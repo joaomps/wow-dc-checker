@@ -67,7 +67,7 @@ def handle_accounts():
     else:
         print("No accounts found.")
 
-schedule.every(2).minute.do(handle_accounts)
+schedule.every(2).minutes.do(handle_accounts)
 
 while 1:
     n = schedule.idle_seconds()
