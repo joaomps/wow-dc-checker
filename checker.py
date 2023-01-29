@@ -19,7 +19,6 @@ def handle_delete_account(account):
     payload = {'account':account}
     headers = {'content-type': 'application/json'}
     result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
-    print(result.status_code)
 
 def send_discord_message(account, minutes_passed):
     # send post to disc_notifications with the account and minutes_passed
@@ -44,7 +43,6 @@ def send_discord_message(account, minutes_passed):
         disc_notifications, json=data, headers=headers)
 
     if 200 <= result.status_code < 300:
-        print(f"Webhook sent {result.status_code}")
         # delete account from ws
         handle_delete_account(account)
     else:
