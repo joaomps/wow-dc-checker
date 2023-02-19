@@ -23,10 +23,18 @@ def get_accounts():
         print("An error occurred:", e)
         return None
 
+@retry(stop_max_attempt_number=5, wait_fixed=3000)
 def handle_delete_account(account):
     payload = {'account':account}
     headers = {'content-type': 'application/json'}
-    result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
+    try:
+        result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
+    except requests.exceptions.Timeout:
+        print("The request timed out.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
+        return None
 
 def send_discord_message(account, minutes_passed):
     # send post to disc_notifications with the account and minutes_passed
