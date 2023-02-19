@@ -9,6 +9,7 @@ disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAri
 
 
 def get_accounts():
+    time.sleep(1)
     r = requests.get(get_accounts_url)
     if r.status_code == 200:
         return r.json()
@@ -18,6 +19,7 @@ def get_accounts():
 def handle_delete_account(account):
     payload = {'account':account}
     headers = {'content-type': 'application/json'}
+    time.sleep(1)
     result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
 
 def send_discord_message(account, minutes_passed):
@@ -39,6 +41,7 @@ def send_discord_message(account, minutes_passed):
         "Content-Type": "application/json"
     }
 
+    time.sleep(1)
     result = requests.post(
         disc_notifications, json=data, headers=headers)
 
