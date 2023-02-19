@@ -9,11 +9,17 @@ disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAri
 
 
 def get_accounts():
-    time.sleep(1)
-    r = requests.get(get_accounts_url)
-    if r.status_code == 200:
-        return r.json()
-    else:
+    try:
+        r = requests.get(get_accounts_url, timeout=10)
+        if r.status_code == 200:
+            return r.json()
+        else:
+            return None
+    except requests.exceptions.Timeout:
+        print("The request timed out.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
         return None
 
 def handle_delete_account(account):
