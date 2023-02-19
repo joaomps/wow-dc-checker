@@ -3,14 +3,15 @@ import datetime
 import schedule
 import time
 import json
+from retrying import retry
 
 get_accounts_url = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts'
 disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAriOIh4cPiZkWGWhBiEqKXiAaPLZfpDFAe7Ppx7eUHP_QU3szCM60UsGjhxoIp3FCf"
 
-
+@retry(stop_max_attempt_number=5, wait_fixed=3000)
 def get_accounts():
     try:
-        r = requests.get(get_accounts_url, timeout=10)
+        r = requests.get(get_accounts_url)
         if r.status_code == 200:
             return r.json()
         else:
@@ -25,7 +26,6 @@ def get_accounts():
 def handle_delete_account(account):
     payload = {'account':account}
     headers = {'content-type': 'application/json'}
-    time.sleep(1)
     result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
 
 def send_discord_message(account, minutes_passed):
@@ -47,7 +47,6 @@ def send_discord_message(account, minutes_passed):
         "Content-Type": "application/json"
     }
 
-    time.sleep(1)
     result = requests.post(
         disc_notifications, json=data, headers=headers)
 
