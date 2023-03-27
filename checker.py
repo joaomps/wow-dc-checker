@@ -79,7 +79,7 @@ def handle_accounts():
             minutes_passed = (
                 current_time - account_lastseen).total_seconds() / 60
             if minutes_passed > 5:
-                send_discord_message(account['account'], minutes_passed)
+                send_discord_message(account['account'], round(minutes_passed))
     else:
         print("No accounts found.")
 
