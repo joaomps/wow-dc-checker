@@ -4,9 +4,11 @@ import schedule
 import time
 import json
 from retrying import retry
+from dateutil import parser
 
 get_accounts_url = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts'
 disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAriOIh4cPiZkWGWhBiEqKXiAaPLZfpDFAe7Ppx7eUHP_QU3szCM60UsGjhxoIp3FCf"
+
 
 @retry(stop_max_attempt_number=5, wait_fixed=3000)
 def get_accounts():
@@ -23,18 +25,21 @@ def get_accounts():
         print("An error occurred:", e)
         return None
 
+
 @retry(stop_max_attempt_number=5, wait_fixed=3000)
 def handle_delete_account(account):
-    payload = {'account':account}
+    payload = {'account': account}
     headers = {'content-type': 'application/json'}
     try:
-        result = requests.delete(get_accounts_url, data=json.dumps(payload), headers=headers)
+        result = requests.delete(
+            get_accounts_url, data=json.dumps(payload), headers=headers)
     except requests.exceptions.Timeout:
         print("The request timed out.")
         return None
     except requests.exceptions.RequestException as e:
         print("An error occurred:", e)
         return None
+
 
 def send_discord_message(account, minutes_passed):
     # send post to disc_notifications with the account and minutes_passed
@@ -73,8 +78,9 @@ def handle_accounts():
     if accounts:
         for account in accounts:
             # convert date from string to datetime object
-            account_lastseen = datetime.datetime.strptime(
-                account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            # account_lastseen = datetime.datetime.strptime(
+            #     account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            account_lastseen = parser.parse(account['lastseen'])
             # check how many minutes have passed between current_time and account_lastseen
             minutes_passed = (
                 current_time - account_lastseen).total_seconds() / 60
@@ -82,6 +88,7 @@ def handle_accounts():
                 send_discord_message(account['account'], round(minutes_passed))
     else:
         print("No accounts found.")
+
 
 schedule.every(2).minutes.do(handle_accounts)
 
