@@ -74,13 +74,16 @@ def send_discord_message(account, minutes_passed):
 def handle_accounts():
     accounts = get_accounts()
     # get current date as string
-    current_time = datetime.datetime.now()
+    current_time = datetime.datetime.now(
+        datetime.timezone.utc).replace(tzinfo=None)
     if accounts:
         for account in accounts:
             # convert date from string to datetime object
             # account_lastseen = datetime.datetime.strptime(
             #     account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
             account_lastseen = parser.parse(account['lastseen'])
+            account_lastseen = account_lastseen.replace(
+                tzinfo=datetime.timezone.utc)
             # check how many minutes have passed between current_time and account_lastseen
             minutes_passed = (
                 current_time - account_lastseen).total_seconds() / 60
