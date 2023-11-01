@@ -100,13 +100,10 @@ def handle_accounts():
     if accounts:
         for account in accounts:
             if account['status'] == 'Breaking':
-                account_lastseen = datetime.datetime.strptime(
-                    account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                break_minutes = account['break_time']
-                end_of_break = account_lastseen + \
-                    datetime.timedelta(minutes=break_minutes) + \
-                    datetime.timedelta(minutes=random.randint(2, 6))
-                if current_time >= end_of_break:
+                end_of_break_in_time = datetime.datetime.fromtimestamp(
+                    account['break_time']) + datetime.timedelta(minutes=random.randint(3, 6))
+
+                if current_time >= end_of_break_in_time:
                     send_discord_message(account['account'])
     else:
         print("No accounts found.")
