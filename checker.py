@@ -103,7 +103,7 @@ def handle_accounts():
                     account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
                 break_minutes = account['break_time']
                 # check if account_lastseen + break_minutes > current_time + 5 minutes
-                if account_lastseen + datetime.timedelta(minutes=break_minutes) > current_time + datetime.timedelta(minutes=5):
+                if account_lastseen + datetime.timedelta(minutes=break_minutes) <= current_time + datetime.timedelta(minutes=5):
                     send_discord_message(account['account'])
     else:
         print("No accounts found.")
