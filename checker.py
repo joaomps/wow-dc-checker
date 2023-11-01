@@ -1,3 +1,4 @@
+import random
 import requests
 import datetime
 import schedule
@@ -102,8 +103,10 @@ def handle_accounts():
                 account_lastseen = datetime.datetime.strptime(
                     account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
                 break_minutes = account['break_time']
-                # check if account_lastseen + break_minutes > current_time + 5 minutes
-                if account_lastseen + datetime.timedelta(minutes=break_minutes) <= current_time + datetime.timedelta(minutes=5):
+                end_of_break = account_lastseen + \
+                    datetime.timedelta(minutes=break_minutes) + \
+                    datetime.timedelta(minutes=random.randint(2, 6))
+                if current_time >= end_of_break:
                     send_discord_message(account['account'])
     else:
         print("No accounts found.")
