@@ -7,6 +7,7 @@ from retrying import retry
 
 get_accounts_url = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts'
 disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAriOIh4cPiZkWGWhBiEqKXiAaPLZfpDFAe7Ppx7eUHP_QU3szCM60UsGjhxoIp3FCf"
+accounts_ws = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts/'
 
 
 @retry(stop_max_attempt_number=5, wait_fixed=3000)
@@ -40,8 +41,28 @@ def handle_delete_account(account):
         return None
 
 
-def send_discord_message(account, minutes_passed):
-    # send post to disc_notifications with the account and minutes_passed
+@retry(stop_max_attempt_number=5, wait_fixed=3000)
+def update_account_status(account):
+    data = {
+        "account": account,
+        "break_time": 0,
+        "status": "Offline"
+    }
+
+    headers = {"Content-Type": "application/json"}
+
+    try:
+        result = requests.post(accounts_ws, json=data, headers=headers)
+    except requests.exceptions.Timeout:
+        print("The request timed out.")
+        return None
+    except requests.exceptions.RequestException as e:
+        print("An error occurred:", e)
+        return None
+
+
+def send_discord_message(account):
+    # send post to disc_notifications with the account
     data = {
         "content": "@here",
         "username": account,
@@ -50,7 +71,7 @@ def send_discord_message(account, minutes_passed):
                 "title": "Disconnected",
                 "color": 14696255,
                 "timestamp": str(datetime.datetime.utcnow()),
-                "description": account + " was last seen " + str(minutes_passed) + " minutes ago",
+                "description": account + " was last seen a few minutes ago.",
             }
         ],
     }
@@ -65,6 +86,7 @@ def send_discord_message(account, minutes_passed):
     if 200 <= result.status_code < 300:
         # delete account from ws
         handle_delete_account(account)
+        update_account_status(account)
     else:
         print(
             f"Not sent with {result.status_code}, response:\n{result.json()}")
@@ -76,14 +98,13 @@ def handle_accounts():
     current_time = datetime.datetime.now()
     if accounts:
         for account in accounts:
-            # convert date from string to datetime object
-            account_lastseen = datetime.datetime.strptime(
-                account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
-            # check how many minutes have passed between current_time and account_lastseen
-            minutes_passed = (
-                current_time - account_lastseen).total_seconds() / 60
-            if minutes_passed > 5:
-                send_discord_message(account['account'], round(minutes_passed))
+            if account['status'] == 'Breaking':
+                account_lastseen = datetime.datetime.strptime(
+                    account['lastseen'], '%Y-%m-%dT%H:%M:%S.%fZ')
+                break_minutes = account['break_time']
+                # check if account_lastseen + break_minutes > current_time + 5 minutes
+                if account_lastseen + datetime.timedelta(minutes=break_minutes) > current_time + datetime.timedelta(minutes=5):
+                    send_discord_message(account['account'])
     else:
         print("No accounts found.")
 
