@@ -6,9 +6,9 @@ import time
 import json
 from retrying import retry
 
-get_accounts_url = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts'
-disc_notifications = "https://discord.com/api/webhooks/1068981486759460864/CmAriOIh4cPiZkWGWhBiEqKXiAaPLZfpDFAe7Ppx7eUHP_QU3szCM60UsGjhxoIp3FCf"
-accounts_ws = 'https://expressjs-prisma-production-36b8.up.railway.app/accounts/'
+get_accounts_url = 'https://expressjs-prisma-production.app/accounts'
+disc_notifications = "https://discord.com/api/webhooks/123/1234"
+accounts_ws = 'https://expressjs-prisma-production.app/accounts/'
 
 
 @retry(stop_max_attempt_number=5, wait_fixed=3000)
